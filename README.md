@@ -1,1 +1,3 @@
-# group-maker
+## group-maker
+
+グループを作るBotです。
