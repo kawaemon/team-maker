@@ -15,7 +15,7 @@ type ParseResult struct {
 }
 
 var (
-	regex = regexp.MustCompile(`^(?P<type>男子?|女子?|全員で|(?P<member_count>\d+)人で)?(?P<team_count>\d+)チーム作成$`)
+	regex = regexp.MustCompile(`^(?P<type>男子?|女子?|全員で|(?P<member_count>\d+)人で)?(?P<team_count>\d+)(?:チーム|グループ)作成$`)
 )
 
 func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
