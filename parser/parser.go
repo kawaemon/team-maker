@@ -15,7 +15,7 @@ type ParseResult struct {
 }
 
 var (
-	regex = regexp.MustCompile(`^(?P<type>男子?|女子?|(?P<member_count>\d+)人で)(?P<team_count>\d+)チーム作成$`)
+	regex = regexp.MustCompile(`^(?P<type>男子?|女子?|全員で|(?P<member_count>\d+)人で)?(?P<team_count>\d+)チーム作成$`)
 )
 
 func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
@@ -42,6 +42,7 @@ func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
 
 	result.TeamMembers = []string{}
 	switch {
+	//男子だけ
 	case strings.HasPrefix(type_, "男"):
 		for i := 1; i <= conf.Total; i++ {
 			// if confManNumbers.contains(i) { continue; }
@@ -65,6 +66,7 @@ func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
 			}
 		}
 
+	// 女子だけ
 	case strings.HasPrefix(type_, "女"):
 		for _, v := range conf.WomanNumbers {
 			name, ok := conf.NameMap[v]
@@ -77,7 +79,21 @@ func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
 			result.TeamMembers = append(result.TeamMembers, name)
 		}
 
-	default:
+	// 全員で
+	case type_ == "" || type_ == "全員で":
+		for i := 1; i <= conf.Total; i++ {
+			name, ok := conf.NameMap[i]
+
+			if !ok {
+				result.TeamMembers = append(result.TeamMembers, strconv.Itoa(i))
+				continue
+			}
+
+			result.TeamMembers = append(result.TeamMembers, name)
+		}
+
+	// 指定された人数で
+	case strings.HasSuffix(type_, "人で"):
 		memberCountStr := match[2]
 		memberCount, perr := strconv.Atoi(memberCountStr)
 
