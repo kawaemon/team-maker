@@ -33,6 +33,16 @@ func main() {
 				return
 			}
 
+			if parsed.TeamCount <= 0 {
+				log.Println("Group count was less than 1")
+				return "作成するグループ数は1以上にしてください"
+			}
+
+			if parsed.TeamCount > len(parsed.TeamMembers) {
+				log.Println("Group count was bigger than team members")
+				return "グループのメンバーよりチーム数の方が多いです"
+			}
+
 			log.Printf("Making group. msg: %s, count: %d\n", msg, parsed.TeamCount)
 
 			randomized := randomize.Randomize(parsed)
