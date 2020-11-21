@@ -60,7 +60,7 @@ func main() {
 
 func format(groups [][]string) (result string) {
 	for index, group := range groups {
-		result += fmt.Sprintf("チーム%d\n", index+1)
+		result += fmt.Sprintf("グループ%d\n", index+1)
 
 		for _, member := range group {
 			result += fmt.Sprintf("%s\n", member)
