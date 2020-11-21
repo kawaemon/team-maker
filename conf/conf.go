@@ -14,7 +14,7 @@ type Configuration struct {
 	WomanNumbers []int          `json:"womanNumbers"`
 }
 
-const envVarName = "TEAM_MAKER_CONF_JSON"
+const envVarName = "GROUP_MAKER_CONF_JSON"
 
 func FromEnv() (conf Configuration, err error) {
 	data := os.Getenv(envVarName)
