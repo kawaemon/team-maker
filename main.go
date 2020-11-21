@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/kawaemon/group-maker/conf"
 	"github.com/kawaemon/group-maker/client"
+	"github.com/kawaemon/group-maker/conf"
 	"github.com/kawaemon/group-maker/parser"
 	"github.com/kawaemon/group-maker/randomize"
 	"log"

@@ -48,5 +48,5 @@ func FromEnv() (conf Configuration, err error) {
 		return
 	}
 
-    return
+	return
 }
