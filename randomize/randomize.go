@@ -1,25 +1,24 @@
 package randomize
 
 import (
-	"github.com/kawaemon/group-maker/parser"
-	"math/rand"
 	"sort"
+
+	"github.com/kawaemon/group-maker/g"
+	"github.com/kawaemon/group-maker/parser"
 )
 
-func Randomize(data parser.ParseResult) [][]string {
-	rand.Shuffle(len(data.TeamMembers), func(i, j int) {
-		data.TeamMembers[i], data.TeamMembers[j] = data.TeamMembers[j], data.TeamMembers[i]
-	})
+func Randomize(data parser.ParseResult) g.Slice[g.Slice[string]] {
+	data.TeamMembers.Shuffle()
 
-	result := make([][]string, 0, data.TeamCount)
+	result := g.NewSliceWithCapacity[g.Slice[string]](data.TeamCount)
 
 	for i := 0; i < data.TeamCount; i++ {
-		result = append(result, make([]string, 0))
+		result.Push(g.NewSlice[string]())
 	}
 
 	currentIndex := 0
-	for _, v := range data.TeamMembers {
-		result[currentIndex] = append(result[currentIndex], v)
+	for _, v := range data.TeamMembers.Slice() {
+		result.GetRef(currentIndex).Push(v)
 
 		currentIndex += 1
 		if currentIndex == data.TeamCount {
@@ -27,8 +26,8 @@ func Randomize(data parser.ParseResult) [][]string {
 		}
 	}
 
-	for _, v := range result {
-		sort.Strings(v)
+	for _, v := range result.Slice() {
+		sort.Strings(v.Slice())
 	}
 
 	return result

@@ -2,6 +2,9 @@ package client
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +17,7 @@ import (
 
 type LineClient struct {
 	ChannelAccessToken string
+	ChannelSecret      string
 	OnMessage          func(string) string
 }
 
@@ -64,6 +68,8 @@ type toLineRequest struct {
 const replyEndPoint = "https://api.line.me/v2/bot/message/reply"
 
 func (c *LineClient) onRequest(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	if r.Method != "POST" {
 		return
 	}
@@ -73,23 +79,34 @@ func (c *LineClient) onRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := ioutil.ReadAll(r.Body)
-
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Failed to fetch request body: %s\n", err)
 		return
 	}
 
-	deserData := lineRequest{}
-	err = json.Unmarshal(data, &deserData)
+	// check signature
+	decodedSignature, err := base64.StdEncoding.DecodeString(r.Header.Get("x-line-signature"))
+	if err != nil {
+		log.Printf("Failed to decode Line Signature: %s\n", err)
+		return
+	}
 
+	hasher := hmac.New(sha256.New, []byte(c.ChannelAccessToken))
+	hasher.Write(body)
+	if hmac.Equal(hasher.Sum(nil), decodedSignature) {
+		log.Printf("Failed to verify Line Signature\n")
+		return
+	}
+
+	deserData := lineRequest{}
+	err = json.Unmarshal(body, &deserData)
 	if err != nil {
 		log.Printf("Failed to deserialize request: %s\n", err)
 		return
 	}
 
 	events := deserData.Events
-
 	if events == nil {
 		return
 	}
@@ -142,7 +159,6 @@ func (c *LineClient) replyToLine(replyToken string, msg string) error {
 
 	httpClient := http.Client{}
 	response, err := httpClient.Do(req)
-
 	if err != nil {
 		return fmt.Errorf("failed to send request to line reply api endpoint: %w", err)
 	}

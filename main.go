@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/kawaemon/group-maker/client"
-	"github.com/kawaemon/group-maker/conf"
-	"github.com/kawaemon/group-maker/parser"
-	"github.com/kawaemon/group-maker/randomize"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
+	"github.com/kawaemon/group-maker/client"
+	"github.com/kawaemon/group-maker/conf"
+	"github.com/kawaemon/group-maker/g"
+	"github.com/kawaemon/group-maker/parser"
+	"github.com/kawaemon/group-maker/randomize"
 )
 
 func main() {
+	godotenv.Load()
 	config, err := conf.FromEnv()
 
 	if err != nil {
@@ -19,13 +23,18 @@ func main() {
 	}
 
 	channelAccessToken := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
-
 	if channelAccessToken == "" {
+		log.Fatalln("Set LINE_CHANNEL_ACCESS_TOKEN")
+	}
+
+	channelSecret := os.Getenv("LINE_CHANNEL_SECRET")
+	if channelSecret == "" {
 		log.Fatalln("Set LINE_CHANNEL_ACCESS_TOKEN")
 	}
 
 	lineClient := client.LineClient{
 		ChannelAccessToken: channelAccessToken,
+		ChannelSecret:      channelSecret,
 		OnMessage: func(msg string) (result string) {
 			parsed, ok := parser.Parse(config, msg)
 
@@ -38,7 +47,7 @@ func main() {
 				return "作成するグループ数は1以上にしてください"
 			}
 
-			if parsed.TeamCount > len(parsed.TeamMembers) {
+			if parsed.TeamCount > parsed.TeamMembers.Len() {
 				log.Println("Group count was bigger than team members")
 				return "グループのメンバーよりチーム数の方が多いです"
 			}
@@ -58,11 +67,11 @@ func main() {
 	}
 }
 
-func format(groups [][]string) (result string) {
-	for index, group := range groups {
+func format(groups g.Slice[g.Slice[string]]) (result string) {
+	for index, group := range groups.Slice() {
 		result += fmt.Sprintf("グループ%d\n", index+1)
 
-		for _, member := range group {
+		for _, member := range group.Slice() {
 			result += fmt.Sprintf("%s\n", member)
 		}
 

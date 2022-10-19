@@ -2,15 +2,17 @@ package parser
 
 import (
 	"fmt"
-	"github.com/kawaemon/group-maker/conf"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/kawaemon/group-maker/conf"
+	"github.com/kawaemon/group-maker/g"
 )
 
 type ParseResult struct {
-	TeamMembers []string
+	TeamMembers g.Slice[string]
 	TeamCount   int
 }
 
@@ -40,70 +42,52 @@ func Parse(conf conf.Configuration, text string) (result ParseResult, ok bool) {
 		log.Fatalf("strconv.Atoi returned error: %s, input was %s", err, teamCountStr)
 	}
 
-	result.TeamMembers = []string{}
+	result.TeamMembers = g.NewSlice[string]()
+
+	pushTeamMember := func(i int) {
+		if name, ok := conf.NameMap[i]; ok {
+			result.TeamMembers.Push(name)
+		} else {
+			result.TeamMembers.Push(strconv.Itoa(i))
+		}
+	}
+
 	switch {
-	//男子だけ
+	// 男子だけ
 	case strings.HasPrefix(type_, "男"):
 		for i := 1; i <= conf.Total; i++ {
-			// if confManNumbers.contains(i) { continue; }
-			flag := false
-			for _, man := range conf.WomanNumbers {
-				if i == man {
-					flag = true
-				}
-			}
-
-			if flag {
+			if g.Contains(&conf.Women, i) {
 				continue
 			}
 
-			name, ok := conf.NameMap[i]
-
-			if ok {
-				result.TeamMembers = append(result.TeamMembers, name)
-			} else {
-				result.TeamMembers = append(result.TeamMembers, strconv.Itoa(i))
-			}
+			pushTeamMember(i)
 		}
 
 	// 女子だけ
 	case strings.HasPrefix(type_, "女"):
-		for _, v := range conf.WomanNumbers {
-			name, ok := conf.NameMap[v]
-
-			if !ok {
-				result.TeamMembers = append(result.TeamMembers, strconv.Itoa(v))
-				continue
-			}
-
-			result.TeamMembers = append(result.TeamMembers, name)
+		for _, v := range conf.Women.Slice() {
+			pushTeamMember(v)
 		}
 
 	// 全員で
 	case type_ == "" || type_ == "全員で":
 		for i := 1; i <= conf.Total; i++ {
-			name, ok := conf.NameMap[i]
-
-			if !ok {
-				result.TeamMembers = append(result.TeamMembers, strconv.Itoa(i))
-				continue
-			}
-
-			result.TeamMembers = append(result.TeamMembers, name)
+			pushTeamMember(i)
 		}
 
 	// 指定された人数で
 	case strings.HasSuffix(type_, "人で"):
 		memberCountStr := match[2]
-		memberCount, perr := strconv.Atoi(memberCountStr)
+		memberCount, err := strconv.Atoi(memberCountStr)
 
-		if perr != nil {
-			err = perr
-			return
+		// 正規表現で文字列には正しい文字しか含まれていることが保証されているはず
+		// ここでエラーが起きるのは完全に想定外なので落とす
+		if err != nil {
+			log.Fatalf("strconv.Atoi returned error: %s, input was %s", err, teamCountStr)
 		}
 
 		for i := 1; i <= memberCount; i++ {
-			result.TeamMembers = append(result.TeamMembers, fmt.Sprintf("%d番", i))
+			result.TeamMembers.Push(fmt.Sprintf("%d番", i))
 		}
 	}
 

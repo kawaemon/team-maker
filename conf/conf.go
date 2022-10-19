@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/kawaemon/group-maker/g"
 )
 
 type Configuration struct {
-	NameMap      map[int]string `json:"names"`
-	Total        int            `json:"total"`
-	WomanNumbers []int          `json:"womanNumbers"`
+	NameMap map[int]string `json:"names"`
+	Total   int            `json:"total"`
+	Women   g.Slice[int]   `json:"women"`
 }
 
 const envVarName = "GROUP_MAKER_CONF_JSON"
@@ -43,8 +45,8 @@ func FromEnv() (conf Configuration, err error) {
 		return
 	}
 
-	if conf.WomanNumbers == nil {
-		err = errors.New("field \"womanNumbers\" isn't specified")
+	if conf.Women.IsNil() {
+		err = errors.New("field \"women\" isn't specified")
 		return
 	}
 
