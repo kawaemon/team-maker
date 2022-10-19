@@ -1,4 +1,4 @@
-module github.com/kawaemon/group-maker
+module github.com/kawaemon/team-maker
 
 go 1.19
 

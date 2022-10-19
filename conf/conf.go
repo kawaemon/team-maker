@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kawaemon/group-maker/g"
+	"github.com/kawaemon/team-maker/g"
 )
 
 type Configuration struct {
@@ -16,7 +16,7 @@ type Configuration struct {
 	Women   g.Slice[int]   `json:"women"`
 }
 
-const envVarName = "GROUP_MAKER_CONF_JSON"
+const envVarName = "TEAM_MAKER_CONF_JSON"
 
 func FromEnv() (conf Configuration, err error) {
 	data := os.Getenv(envVarName)

@@ -3,8 +3,8 @@ package randomize
 import (
 	"sort"
 
-	"github.com/kawaemon/group-maker/g"
-	"github.com/kawaemon/group-maker/parser"
+	"github.com/kawaemon/team-maker/g"
+	"github.com/kawaemon/team-maker/parser"
 )
 
 func Randomize(data parser.ParseResult) g.Slice[g.Slice[string]] {

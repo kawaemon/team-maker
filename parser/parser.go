@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kawaemon/group-maker/conf"
-	"github.com/kawaemon/group-maker/g"
+	"github.com/kawaemon/team-maker/conf"
+	"github.com/kawaemon/team-maker/g"
 )
 
 type ParseResult struct {

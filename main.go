@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/kawaemon/group-maker/client"
-	"github.com/kawaemon/group-maker/conf"
-	"github.com/kawaemon/group-maker/g"
-	"github.com/kawaemon/group-maker/parser"
-	"github.com/kawaemon/group-maker/randomize"
+	"github.com/kawaemon/team-maker/client"
+	"github.com/kawaemon/team-maker/conf"
+	"github.com/kawaemon/team-maker/g"
+	"github.com/kawaemon/team-maker/parser"
+	"github.com/kawaemon/team-maker/randomize"
 )
 
 func main() {
@@ -43,16 +43,16 @@ func main() {
 			}
 
 			if parsed.TeamCount <= 0 {
-				log.Println("Group count was less than 1")
-				return "作成するグループ数は1以上にしてください"
+				log.Println("Team count was less than 1")
+				return "作成するチーム数は1以上にしてください"
 			}
 
 			if parsed.TeamCount > parsed.TeamMembers.Len() {
-				log.Println("Group count was bigger than team members")
-				return "グループのメンバーよりチーム数の方が多いです"
+				log.Println("Team count was bigger than team members")
+				return "チームのメンバーよりチーム数の方が多いです"
 			}
 
-			log.Printf("Making group. msg: %s, count: %d\n", msg, parsed.TeamCount)
+			log.Printf("Making teams. msg: %s, count: %d\n", msg, parsed.TeamCount)
 
 			randomized := randomize.Randomize(parsed)
 			result = format(randomized)
@@ -67,11 +67,11 @@ func main() {
 	}
 }
 
-func format(groups g.Slice[g.Slice[string]]) (result string) {
-	for index, group := range groups.Slice() {
-		result += fmt.Sprintf("グループ%d\n", index+1)
+func format(teams g.Slice[g.Slice[string]]) (result string) {
+	for index, team := range teams.Slice() {
+		result += fmt.Sprintf("チーム%d\n", index+1)
 
-		for _, member := range group.Slice() {
+		for _, member := range team.Slice() {
 			result += fmt.Sprintf("%s\n", member)
 		}
 
